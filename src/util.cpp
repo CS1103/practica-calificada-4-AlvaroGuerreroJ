@@ -1,4 +1,5 @@
 #include <cmath>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -35,9 +36,9 @@ void encode(std::string_view filename, std::vector<unsigned char>& image,
     }
 }
 
-void filter_positions(std::vector<unsigned char>& image,
-                      size_t rows, size_t cols,
-                      std::initializer_list<size_t> const& positions_to_filter)
+void for_each_pixel(std::vector<unsigned char>& image,
+                    size_t rows, size_t cols,
+                    std::function<void(pixel_ref, size_t row, size_t col)> fn)
 {
     size_t n_pixels = rows * cols;
     size_t number_threads = std::thread::hardware_concurrency();
@@ -64,10 +65,11 @@ void filter_positions(std::vector<unsigned char>& image,
                 size_t j;
                 std::tie(i, j) = *it;
 
-                for (auto p : positions_to_filter)
-                {
-                    image[i * cols * 4 + j * 4 + p] = 0;
-                }
+                fn(std::tie(image[i * cols * 4 + j * 4],
+                            image[i * cols * 4 + j * 4 + 1],
+                            image[i * cols * 4 + j * 4 + 2],
+                            image[i * cols * 4 + j * 4 + 3]),
+                   i, j);
             }
         },
         cur_start, cur_end);
