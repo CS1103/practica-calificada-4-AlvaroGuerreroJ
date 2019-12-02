@@ -33,124 +33,15 @@ int main()
     //     std::cout << std::endl;
     // }
 
-    size_t number_threads = std::thread::hardware_concurrency();
-    size_t n_pixels = rows * cols;
-    size_t elements_per_thread = (size_t) std::ceil(double(n_pixels)
-                                                    / number_threads);
-
     std::vector<unsigned char> red_filtered(image);
-
-    {
-        size_t cur_start = 0;
-
-        std::vector<std::thread> threads;
-
-        while (cur_start < n_pixels)
-        {
-            size_t cur_end = cur_start + elements_per_thread;
-            if (cur_end >= n_pixels)
-            {
-                cur_end = n_pixels;
-            }
-
-            threads.emplace_back([&](size_t start, size_t end) {
-                auto e = coordinate_generator(end, cols);
-                for (auto it = coordinate_generator(start, cols); it != e; ++it)
-                {
-                    size_t i;
-                    size_t j;
-                    std::tie(i, j) = *it;
-
-                    red_filtered[i * cols * 4 + j * 4 + 1] = 0;
-                    red_filtered[i * cols * 4 + j * 4 + 2] = 0;
-                }
-            },
-            cur_start, cur_end);
-
-            cur_start = cur_end;
-        }
-
-        for (auto& t : threads)
-        {
-            t.join();
-        }
-    }
+    filter_positions(red_filtered, rows, cols, {1, 2});
 
     std::vector<unsigned char> green_filtered(image);
-
-    {
-        size_t cur_start = 0;
-
-        std::vector<std::thread> threads;
-
-        while (cur_start < n_pixels)
-        {
-            size_t cur_end = cur_start + elements_per_thread;
-            if (cur_end >= n_pixels)
-            {
-                cur_end = n_pixels;
-            }
-
-            threads.emplace_back([&](size_t start, size_t end) {
-                auto e = coordinate_generator(end, cols);
-                for (auto it = coordinate_generator(start, cols); it != e; ++it)
-                {
-                    size_t i;
-                    size_t j;
-                    std::tie(i, j) = *it;
-
-                    green_filtered[i * cols * 4 + j * 4 + 0] = 0;
-                    green_filtered[i * cols * 4 + j * 4 + 2] = 0;
-                }
-            },
-            cur_start, cur_end);
-
-            cur_start = cur_end;
-        }
-
-        for (auto& t : threads)
-        {
-            t.join();
-        }
-    }
+    filter_positions(green_filtered, rows, cols, {0, 2});
 
     std::vector<unsigned char> blue_filtered(image);
+    filter_positions(blue_filtered, rows, cols, {0, 1});
 
-    {
-        size_t cur_start = 0;
-
-        std::vector<std::thread> threads;
-
-        while (cur_start < n_pixels)
-        {
-            size_t cur_end = cur_start + elements_per_thread;
-            if (cur_end >= n_pixels)
-            {
-                cur_end = n_pixels;
-            }
-
-            threads.emplace_back([&](size_t start, size_t end) {
-                auto e = coordinate_generator(end, cols);
-                for (auto it = coordinate_generator(start, cols); it != e; ++it)
-                {
-                    size_t i;
-                    size_t j;
-                    std::tie(i, j) = *it;
-
-                    blue_filtered[i * cols * 4 + j * 4 + 0] = 0;
-                    blue_filtered[i * cols * 4 + j * 4 + 1] = 0;
-                }
-            },
-            cur_start, cur_end);
-
-            cur_start = cur_end;
-        }
-
-        for (auto& t : threads)
-        {
-            t.join();
-        }
-    }
 
     std::thread write_red_filtered(encode, "../red_filter.png",
                                    std::ref(red_filtered), cols, rows);
