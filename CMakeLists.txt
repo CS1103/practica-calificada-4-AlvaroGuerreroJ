@@ -11,4 +11,4 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wpedantic -Wextra -pthread")
 endif()
 
-add_executable (pc4 src/main.cpp src/lodepng.cpp src/util.cpp)
+add_executable (pc4 src/main.cpp src/lodepng.cpp src/util.cpp src/coordinate_generator.cpp)
