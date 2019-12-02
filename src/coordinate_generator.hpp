@@ -27,7 +27,7 @@ public:
     bool operator!=(coordinate_generator const& other);
 
     value_type operator*();
-    value_type& operator++();
+    coordinate_generator& operator++();
 };
 
 #endif  // __UTIL_HPP_
